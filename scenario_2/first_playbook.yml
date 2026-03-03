@@ -6,7 +6,7 @@
   tasks:
     - name: Set example fact
       ansible.builtin.set_fact:
-        example_variable: "This is a test variable set in first playbook"
+        example_variable: "FIRST PLAYBOOK VARIABLE"
 
     - name: Print the fact from first playbook
       ansible.builtin.debug:
