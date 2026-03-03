@@ -1,0 +1,9 @@
+---
+- name: Second playbook - Try to print play variable from first playbook
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Try to print the play variable set in first playbook
+      ansible.builtin.debug:
+        msg: "Second playbook - example_variable: {{ example_variable }}"

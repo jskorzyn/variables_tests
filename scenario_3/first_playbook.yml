@@ -1,0 +1,11 @@
+---
+- name: First playbook - Set play variable and print it
+  hosts: all
+  gather_facts: false
+  vars:
+    example_variable: "This is a test variable set in first playbook as play var"
+
+  tasks:
+    - name: Print the play variable from first playbook
+      ansible.builtin.debug:
+        msg: "First playbook - example_variable: {{ example_variable }}"

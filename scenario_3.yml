@@ -1,0 +1,9 @@
+---
+- name: Scenario 3 - Test play variable persistence with import_playbook
+  gather_facts: false
+
+- name: Include first playbook
+  ansible.builtin.import_playbook: scenario_3/first_playbook.yml
+
+- name: Include second playbook
+  ansible.builtin.import_playbook: scenario_3/second_playbook.yml
