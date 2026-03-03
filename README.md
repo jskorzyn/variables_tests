@@ -22,6 +22,7 @@ The main goal is to test whether variables set using `set_fact` in one playbook 
 - **Main playbook**: `scenario_2.yml`
 - **Method**: Uses `import_playbook` to include complete playbooks
 - **Structure**: Multiple plays, each from a separate playbook file
+- **Target hosts**: Uses `hosts: all` to test against all hosts in the inventory
 - **Files**:
   - `scenario_2/first_playbook.yml` - Sets `example_variable` fact and prints it
   - `scenario_2/second_playbook.yml` - Attempts to print the `example_variable` from first playbook
@@ -31,24 +32,29 @@ The main goal is to test whether variables set using `set_fact` in one playbook 
 ### With ansible-playbook (Traditional CLI)
 
 ```bash
-# Test Scenario 1
+# Test Scenario 1 (uses localhost)
 ansible-playbook scenario_1.yml
 
-# Test Scenario 2
-ansible-playbook scenario_2.yml
+# Test Scenario 2 (requires inventory with target hosts)
+ansible-playbook -i inventory scenario_2.yml
+# Or use a simple inline inventory
+ansible-playbook -i "localhost," scenario_2.yml
 ```
 
 ### With ansible-navigator (Execution Environments)
 
 ```bash
-# Test Scenario 1
+# Test Scenario 1 (uses localhost)
 ansible-navigator run scenario_1.yml -m stdout
 
-# Test Scenario 2
-ansible-navigator run scenario_2.yml -m stdout
+# Test Scenario 2 (requires inventory)
+ansible-navigator run scenario_2.yml -i inventory -m stdout
+# Or use a simple inline inventory
+ansible-navigator run scenario_2.yml -i "localhost," -m stdout
 
 # Or with interactive mode
 ansible-navigator run scenario_1.yml
+ansible-navigator run scenario_2.yml -i "localhost,"
 ```
 
 ### With Ansible Automation Platform (AAP)
@@ -58,11 +64,11 @@ ansible-navigator run scenario_1.yml
    - **Job Template 1**:
      - Name: "Variables Test - Scenario 1"
      - Playbook: `scenario_1.yml`
-     - Inventory: Select an inventory with localhost or any target host
+     - Inventory: Any inventory (playbook targets localhost)
    - **Job Template 2**:
      - Name: "Variables Test - Scenario 2"
      - Playbook: `scenario_2.yml`
-     - Inventory: Select an inventory with localhost or any target host
+     - Inventory: Select an inventory with target hosts (playbook targets all hosts)
 3. **Launch the Job Templates** and review the output logs
 4. **Compare the results** to see if variables persist across included playbooks
 
@@ -87,12 +93,35 @@ ok: [localhost] => {
 ### Scenario 2 (import_playbook)
 Variables may NOT persist as each imported playbook runs as a separate play with its own scope.
 
+**Expected output (when run against a single host):**
+```
+PLAY [First playbook - Set and print fact] *************************************
+
+TASK [Set a fact in first playbook]
+ok: [localhost]
+
+TASK [Print the fact from first playbook]
+ok: [localhost] => {
+    "msg": "First playbook - example_variable: This is a test variable set in first playbook"
+}
+
+PLAY [Second playbook - Print fact from first playbook] ************************
+
+TASK [Print the fact set in first playbook]
+fatal: [localhost]: FAILED! => {
+    "msg": "The task includes an option with an undefined variable. The error was: 'example_variable' is undefined"
+}
+```
+
 **Expected behavior:**
 - First playbook sets and prints the variable successfully
-- Second playbook may fail with an undefined variable error, depending on Ansible version and execution environment
+- Second playbook typically fails with an undefined variable error because facts don't persist across separate plays in imported playbooks
+- Behavior may vary depending on Ansible version and execution environment (especially in AAP)
 
 ## Notes
 
-- All playbooks target `localhost` with `gather_facts: false` for quick testing
+- **Scenario 1** targets `localhost` explicitly for quick testing without requiring an inventory
+- **Scenario 2** targets `all` hosts in the inventory to demonstrate behavior across different environments
+- All playbooks use `gather_facts: false` for faster execution
 - The test variable is named `example_variable`
-- Modify the `hosts:` directive in the playbooks to test against different inventories
+- You can modify the `hosts:` directive in the playbooks to test against different host patterns
