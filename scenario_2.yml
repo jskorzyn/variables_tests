@@ -1,5 +1,6 @@
 ---
 - name: Scenario 2 - Test fact persistence with import_playbook
+  hosts: all
   gather_facts: false
 
 - name: Include first playbook
