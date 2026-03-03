@@ -1,0 +1,11 @@
+---
+- name: Scenario 1 - Test fact persistence across include tasks
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Include first playbook
+      ansible.builtin.include_tasks: scenario_1/first_playbook.yml
+
+    - name: Include second playbook
+      ansible.builtin.include_tasks: scenario_1/second_playbook.yml

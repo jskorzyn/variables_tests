@@ -1,0 +1,9 @@
+---
+- name: Second playbook - Print fact from first playbook
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Print the fact set in first playbook
+      ansible.builtin.debug:
+        msg: "Second playbook - example_variable: {{ example_variable }}"

@@ -1,0 +1,4 @@
+---
+- name: Print the fact set in first playbook
+  ansible.builtin.debug:
+    msg: "Second playbook - example_variable: {{ example_variable }}"

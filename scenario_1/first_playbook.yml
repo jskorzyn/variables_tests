@@ -1,0 +1,8 @@
+---
+- name: Set example fact
+  ansible.builtin.set_fact:
+    example_variable: "This is a test variable set in first playbook"
+
+- name: Print the fact from first playbook
+  ansible.builtin.debug:
+    msg: "First playbook - example_variable: {{ example_variable }}"

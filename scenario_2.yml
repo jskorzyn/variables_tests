@@ -1,0 +1,10 @@
+---
+- name: Scenario 2 - Test fact persistence with import_playbook
+  hosts: localhost
+  gather_facts: false
+
+- name: Include first playbook
+  ansible.builtin.import_playbook: scenario_2/first_playbook.yml
+
+- name: Include second playbook
+  ansible.builtin.import_playbook: scenario_2/second_playbook.yml
