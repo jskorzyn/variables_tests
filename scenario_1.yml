@@ -1,6 +1,6 @@
 ---
 - name: Scenario 1 - Test fact persistence across include tasks
-  hosts: localhost
+  hosts: all
   gather_facts: false
 
   tasks:

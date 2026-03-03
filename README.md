@@ -14,6 +14,7 @@ The main goal is to test whether variables set using `set_fact` in one playbook 
 - **Main playbook**: `scenario_1.yml`
 - **Method**: Uses `include_tasks` to include task files
 - **Structure**: Single play with multiple included task lists
+- **Target hosts**: Uses `hosts: all` to test against all hosts in the inventory
 - **Files**:
   - `scenario_1/first_playbook.yml` - Sets `example_variable` fact and prints it
   - `scenario_1/second_playbook.yml` - Attempts to print the `example_variable` from first playbook
@@ -32,10 +33,12 @@ The main goal is to test whether variables set using `set_fact` in one playbook 
 ### With ansible-playbook (Traditional CLI)
 
 ```bash
-# Test Scenario 1 (uses localhost)
-ansible-playbook scenario_1.yml
+# Test Scenario 1 (requires inventory)
+ansible-playbook -i inventory scenario_1.yml
+# Or use a simple inline inventory
+ansible-playbook -i "localhost," scenario_1.yml
 
-# Test Scenario 2 (requires inventory with target hosts)
+# Test Scenario 2 (requires inventory)
 ansible-playbook -i inventory scenario_2.yml
 # Or use a simple inline inventory
 ansible-playbook -i "localhost," scenario_2.yml
@@ -44,8 +47,10 @@ ansible-playbook -i "localhost," scenario_2.yml
 ### With ansible-navigator (Execution Environments)
 
 ```bash
-# Test Scenario 1 (uses localhost)
-ansible-navigator run scenario_1.yml -m stdout
+# Test Scenario 1 (requires inventory)
+ansible-navigator run scenario_1.yml -i inventory -m stdout
+# Or use a simple inline inventory
+ansible-navigator run scenario_1.yml -i "localhost," -m stdout
 
 # Test Scenario 2 (requires inventory)
 ansible-navigator run scenario_2.yml -i inventory -m stdout
@@ -53,7 +58,7 @@ ansible-navigator run scenario_2.yml -i inventory -m stdout
 ansible-navigator run scenario_2.yml -i "localhost," -m stdout
 
 # Or with interactive mode
-ansible-navigator run scenario_1.yml
+ansible-navigator run scenario_1.yml -i "localhost,"
 ansible-navigator run scenario_2.yml -i "localhost,"
 ```
 
@@ -64,7 +69,7 @@ ansible-navigator run scenario_2.yml -i "localhost,"
    - **Job Template 1**:
      - Name: "Variables Test - Scenario 1"
      - Playbook: `scenario_1.yml`
-     - Inventory: Any inventory (playbook targets localhost)
+     - Inventory: Select an inventory with target hosts (playbook targets all hosts)
    - **Job Template 2**:
      - Name: "Variables Test - Scenario 2"
      - Playbook: `scenario_2.yml`
@@ -77,15 +82,15 @@ ansible-navigator run scenario_2.yml -i "localhost,"
 ### Scenario 1 (include_tasks)
 Variables should persist because all tasks run within the same play context.
 
-**Expected output:**
+**Expected output (when run against a single host):**
 ```
 TASK [Print the fact from first playbook]
-ok: [localhost] => {
+ok: [host] => {
     "msg": "First playbook - example_variable: This is a test variable set in first playbook"
 }
 
 TASK [Print the fact set in first playbook]
-ok: [localhost] => {
+ok: [host] => {
     "msg": "Second playbook - example_variable: This is a test variable set in first playbook"
 }
 ```
@@ -98,17 +103,17 @@ Variables may NOT persist as each imported playbook runs as a separate play with
 PLAY [First playbook - Set and print fact] *************************************
 
 TASK [Set a fact in first playbook]
-ok: [localhost]
+ok: [host]
 
 TASK [Print the fact from first playbook]
-ok: [localhost] => {
+ok: [host] => {
     "msg": "First playbook - example_variable: This is a test variable set in first playbook"
 }
 
 PLAY [Second playbook - Print fact from first playbook] ************************
 
 TASK [Print the fact set in first playbook]
-fatal: [localhost]: FAILED! => {
+fatal: [host]: FAILED! => {
     "msg": "The task includes an option with an undefined variable. The error was: 'example_variable' is undefined"
 }
 ```
@@ -120,8 +125,8 @@ fatal: [localhost]: FAILED! => {
 
 ## Notes
 
-- **Scenario 1** targets `localhost` explicitly for quick testing without requiring an inventory
-- **Scenario 2** targets `all` hosts in the inventory to demonstrate behavior across different environments
+- Both scenarios target `all` hosts in the inventory
+- You can use a simple inline inventory like `-i "localhost,"` for quick testing
 - All playbooks use `gather_facts: false` for faster execution
 - The test variable is named `example_variable`
 - You can modify the `hosts:` directive in the playbooks to test against different host patterns
