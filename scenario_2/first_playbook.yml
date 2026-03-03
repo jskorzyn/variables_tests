@@ -1,6 +1,6 @@
 ---
 - name: First playbook - Set and print fact
-  hosts: localhost
+  hosts: all
   gather_facts: false
 
   tasks:

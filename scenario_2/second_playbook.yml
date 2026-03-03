@@ -1,6 +1,6 @@
 ---
 - name: Second playbook - Print fact from first playbook
-  hosts: localhost
+  hosts: all
   gather_facts: false
 
   tasks:
