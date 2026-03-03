@@ -1,5 +1,6 @@
 ---
 - name: Scenario 3 - Test play variable persistence with import_playbook
+  hosts: localhost
   gather_facts: false
 
 - name: Include first playbook
